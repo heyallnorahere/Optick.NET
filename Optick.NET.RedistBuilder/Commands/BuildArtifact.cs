@@ -96,7 +96,7 @@ namespace Optick.NET.RedistBuilder.Commands
 
         public void Invoke(string[] args)
         {
-            string sourceDirectory = args.Length > 0 ? args[0] : Path.Join(Environment.CurrentDirectory, "optick");
+            string sourceDirectory = args.Length > 0 ? args[0] : "optick";
             if (!Directory.Exists(sourceDirectory))
             {
                 throw new DirectoryNotFoundException($"No such directory: {sourceDirectory}");
