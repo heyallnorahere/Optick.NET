@@ -39,6 +39,7 @@ jobs:
                 Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/$SDK_VERSION/windows/VulkanSDK-$SDK_VERSION-Installer.exe" -OutFile VulkanSDK.exe
                 $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList "--accept-licenses","--default-answer","--confirm-command","install"
                 $installer.WaitForExit();
+                Add-Content $GITHUB_ENV "`nVULKAN_SDK=C:\\VulkanSDK\\$SDK_VERSION"
             - name: pull optick
               shell: bash
               run: git clone --branch fix-vulkan --recursive https://github.com/qbojj/optick.git  
