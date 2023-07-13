@@ -37,13 +37,13 @@ namespace Optick.NET.RedistBuilder.Commands
 
         private static void BuildOptick(string sourceDirectory, string buildDirectory)
         {
-            string cmakeCommand = $"cmake \"{sourceDirectory.Replace("\\", "\\\\")}\" -B \"{buildDirectory.Replace("\\", "\\\\")}\"";
-            string buildCommand = $"cmake --build \"{buildDirectory.Replace("\\", "\\\\")}\" --config Release -j 8";
+            string cmakeCommand = $"cmake {sourceDirectory} -B {buildDirectory}";
+            string buildCommand = $"cmake --build {buildDirectory} --config Release -j 8";
 
             foreach (var cacheKey in sCMakeOptions.Keys)
             {
                 var value = sCMakeOptions[cacheKey].Value;
-                cmakeCommand += $" -D{cacheKey}=\"{value}\"";
+                cmakeCommand += $" -D{cacheKey}={value}";
             }
 
             int exitCode = Utilities.RunCommand(cmakeCommand, cwd: Environment.CurrentDirectory);
@@ -96,7 +96,7 @@ namespace Optick.NET.RedistBuilder.Commands
 
         public void Invoke(string[] args)
         {
-            string sourceDirectory = args.Length > 0 ? args[0] : "optick";
+            string sourceDirectory = args.Length > 0 ? args[0] : Path.Join(Environment.CurrentDirectory, "optick");
             if (!Directory.Exists(sourceDirectory))
             {
                 throw new DirectoryNotFoundException($"No such directory: {sourceDirectory}");
