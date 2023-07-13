@@ -61,6 +61,12 @@ namespace Optick.NET.RedistBuilder.Commands
 
         private static void CreateArtifact(string buildDirectory)
         {
+            string binaryDirectory = buildDirectory;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                binaryDirectory = Path.Join(binaryDirectory, "Release"); // :)
+            }
+
             string libraryName = Utilities.GetSharedLibraryName("OptickCore");
             string libraryPath = Path.Join(buildDirectory, libraryName);
 
