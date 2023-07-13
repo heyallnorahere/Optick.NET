@@ -27,7 +27,7 @@ jobs:
               if: ${{ matrix.os-name == 'macos' }}
               run: |
                 SDK_VERSION="1.3.250.1"
-                curl -sSL https://sdk.lunarg.com/sdk/download/$SDK_VERSION/mac/vulkansdk-macos-$SDK_VERSION.dmg -o vulkansdk.dmg
+                curl -sSL https://sdk.lunarg.com/sdk/download/$SDK_VERSION/mac/vulkansdk-macos-$SDK_VERSION.dmg -o vulkansdk-macos-$SDK_VERSION.dmg
                 sudo hdiutil attach vulkansdk-macos-$SDK_VERSION.dmg
                 sudo /Volumes/vulkansdk-macos-$SDK_VERSION/InstallVulkan.app/Contents/MacOS/InstallVulkan in --al -c
                 echo "VULKAN_SDK=$HOME/VulkanSDK/$SDK_VERSION/macOS" >> "$GITHUB_ENV"
