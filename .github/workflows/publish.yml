@@ -16,30 +16,12 @@ jobs:
               uses: actions/setup-dotnet@v3
               with:
                 dotnet-version: 7.x.x
-            - name: install vulkan (linux)
-              shell: bash
-              if: ${{ matrix.os-name == 'ubuntu' }}
-              run: |
-                sudo apt-get update
-                sudo apt-get install -y libvulkan-dev
-            - name: install vulkan (macos)
-              shell: bash
-              if: ${{ matrix.os-name == 'macos' }}
-              run: |
-                SDK_VERSION="1.3.250.1"
-                curl -sSL https://sdk.lunarg.com/sdk/download/$SDK_VERSION/mac/vulkansdk-macos-$SDK_VERSION.dmg -o vulkansdk-macos-$SDK_VERSION.dmg
-                sudo hdiutil attach vulkansdk-macos-$SDK_VERSION.dmg
-                sudo /Volumes/VulkanSDK/InstallVulkan.app/Contents/MacOS/InstallVulkan in --al -c
-                echo "VULKAN_SDK=$HOME/VulkanSDK/$SDK_VERSION/macOS" >> "$GITHUB_ENV"
-            - name: install vulkan (windows)
-              shell: powershell
-              if: ${{ matrix.os-name == 'windows' }}
-              run: |
-                Set-Variable -Name "SDK_VERSION" -Value "1.3.250.1"
-                Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/$SDK_VERSION/windows/VulkanSDK-$SDK_VERSION-Installer.exe" -OutFile VulkanSDK.exe
-                $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList "--accept-licenses","--default-answer","--confirm-command","install"
-                $installer.WaitForExit();
-                Add-Content $GITHUB_ENV "`nVULKAN_SDK=C:\\VulkanSDK\\$SDK_VERSION"
+            - name: install vulkan
+              uses: humbletim/setup-vulkan-sdk@v1.2.0
+              with:
+                vulkan-query-version: latest
+                vulkan-use-cache: true
+                vulkan-components: Vulkan-Headers, Vulkan-Loader
             - name: pull optick
               shell: bash
               run: git clone --branch fix-vulkan --recursive https://github.com/qbojj/optick.git  
