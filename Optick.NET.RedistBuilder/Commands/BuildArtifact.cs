@@ -68,7 +68,7 @@ namespace Optick.NET.RedistBuilder.Commands
             }
 
             string libraryName = Utilities.GetSharedLibraryName("OptickCore");
-            string libraryPath = Path.Join(buildDirectory, libraryName);
+            string libraryPath = Path.Join(binaryDirectory, libraryName);
 
             string artifactDirectory = Path.Join(Environment.CurrentDirectory, "artifacts");
             Directory.CreateDirectory(artifactDirectory);
