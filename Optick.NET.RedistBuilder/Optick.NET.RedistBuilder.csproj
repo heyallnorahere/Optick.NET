@@ -10,4 +10,10 @@
     <PackageReference Include="NuGet.Packaging" Version="6.6.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Resources Include="Resources\**" />
+    <Content Remove="@(Resources)" />
+    <EmbeddedResource Include="@(Resources)" />
+  </ItemGroup>
+
 </Project>
