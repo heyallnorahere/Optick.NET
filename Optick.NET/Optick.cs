@@ -24,11 +24,18 @@ namespace Optick.NET
             var usedEventName = string.IsNullOrEmpty(eventName) ? functionName : eventName!;
 
             var usedCategory = category ?? NET.Category.None;
-            return EventDescription.Create(usedEventName, fileName, (uint)fileLine, usedCategory.CategoryColor, usedCategory.CategoryMask, flags);
+            return EventDescription.Create(usedEventName, fileName, (uint)fileLine, usedCategory.CategoryColor, usedCategory.CategoryMask, flags | EventDescription.Flags.COPY_NAME_STRING | EventDescription.Flags.COPY_FILENAME_STRING);
         }
 
-        private static unsafe EventDescription* GetEventDescription(MethodBase method, string fileName, int lineNumber, string? name = null, Category? category = null, EventDescription.Flags flags = 0)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static unsafe EventDescription* GetEventDescription(int frameSkip, string? name = null, Category? category = null, EventDescription.Flags flags = 0)
         {
+            var stackFrame = new StackFrame(frameSkip + 1);
+            var method = stackFrame.GetMethod();
+
+            var fileName = stackFrame.GetFileName() ?? "<unknown>";
+            int lineNumber = stackFrame.GetFileLineNumber();
+
             long id = (((long)method.GetHashCode()) << 32) | (long)lineNumber;
             if (!sEventDescriptions.TryGetValue(id, out nint description))
             {
@@ -49,14 +56,12 @@ namespace Optick.NET
                 usedFlags |= EventDescription.Flags.IS_CUSTOM_NAME;
             }
 
-            var stackFrame = new StackFrame(frameSkip);
-            var description = GetEventDescription(stackFrame.GetMethod(), stackFrame.GetFileName(), stackFrame.GetFileLineNumber(), name, category, usedFlags);
-
+            var description = GetEventDescription(frameSkip, name, category, usedFlags);
             return new Event(ref *description);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Event Category(string name, Category category, int frameSkip = 1) => Event(name, category, frameSkip: frameSkip);
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static Event Category(string name, Category category, int frameSkip = 1) => Event(name, category, frameSkip: frameSkip + 1);
 
         /// <summary>
         /// <b>IMPORTANT:</b> user will need to register the thread manually
@@ -98,8 +103,7 @@ namespace Optick.NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static unsafe void Tag(string name, object?[] args, int frameSkip = 1)
         {
-            var stackFrame = new StackFrame(frameSkip);
-            var description = GetEventDescription(stackFrame.GetMethod(), stackFrame.GetFileName(), stackFrame.GetFileLineNumber(), name: name);
+            var description = GetEventDescription(frameSkip, name: name);
 
             var tagType = typeof(Tag);
             var methods = tagType.GetMethods(BindingFlags.Public | BindingFlags.Static);
@@ -132,9 +136,7 @@ namespace Optick.NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static unsafe GPUEvent GPUEvent(string name, int frameSkip = 1)
         {
-            var stackFrame = new StackFrame(frameSkip);
-            var description = GetEventDescription(stackFrame.GetMethod(), stackFrame.GetFileName(), stackFrame.GetFileLineNumber(), name: name);
-
+            var description = GetEventDescription(frameSkip, name: name);
             return new GPUEvent(ref *description);
         }
     }
