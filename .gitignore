@@ -4,5 +4,7 @@
 bin/
 obj/
 artifacts/
+build/
 
 optick/
+*.opt

@@ -344,7 +344,7 @@ namespace Optick.NET
         CANCEL_CAPTURE,
     }
 
-    [UnmanagedFunctionPointer(Optick.Convention)]
+    [UnmanagedFunctionPointer(Optick.CallbackConvention)]
     public delegate bool StateCallback(State state);
 
     public enum FileType : int
@@ -362,13 +362,13 @@ namespace Optick.NET
         VSync
     }
 
-    [UnmanagedFunctionPointer(Optick.Convention)]
+    [UnmanagedFunctionPointer(Optick.CallbackConvention)]
     public delegate nint AllocateFunction(nuint size);
-    [UnmanagedFunctionPointer(Optick.Convention)]
+    [UnmanagedFunctionPointer(Optick.CallbackConvention)]
     public delegate void DeallocateFunction(nint address);
-    [UnmanagedFunctionPointer(Optick.Convention)]
+    [UnmanagedFunctionPointer(Optick.CallbackConvention)]
     public delegate void InitThreadCallback();
 
-    [UnmanagedFunctionPointer(Optick.Convention)]
+    [UnmanagedFunctionPointer(Optick.CallbackConvention)]
     public unsafe delegate void CaptureSaveChunkCallback(byte* data, nuint size);
 }

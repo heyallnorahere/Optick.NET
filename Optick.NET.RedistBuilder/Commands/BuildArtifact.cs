@@ -25,13 +25,22 @@ namespace Optick.NET.RedistBuilder.Commands
     internal sealed class BuildArtifact : ICommand
     {
         private static readonly Dictionary<string, CMakeCacheValue> sCMakeOptions;
+        private static readonly Dictionary<string, string> sLibraryNames;
+
         static BuildArtifact()
         {
             sCMakeOptions = new Dictionary<string, CMakeCacheValue>
             {
+                ["CMAKE_BUILD_TYPE"] = "Release",
                 ["OPTICK_USE_VULKAN"] = true,
                 ["OPTICK_USE_D3D12"] = RuntimeInformation.IsOSPlatform(OSPlatform.Windows),
                 ["OPTICK_BUILD_CONSOLE_SAMPLE"] = false,
+            };
+
+            sLibraryNames = new Dictionary<string, string>
+            {
+                ["optick"] = "OptickCore",
+                ["coptick"] = "coptick"
             };
         }
 
@@ -61,15 +70,6 @@ namespace Optick.NET.RedistBuilder.Commands
 
         private static void CreateArtifact(string buildDirectory)
         {
-            string binaryDirectory = buildDirectory;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                binaryDirectory = Path.Join(binaryDirectory, "Release"); // :)
-            }
-
-            string libraryName = Utilities.GetSharedLibraryName("OptickCore");
-            string libraryPath = Path.Join(binaryDirectory, libraryName);
-
             string artifactDirectory = Path.Join(Environment.CurrentDirectory, "artifacts");
             Directory.CreateDirectory(artifactDirectory);
 
@@ -82,27 +82,39 @@ namespace Optick.NET.RedistBuilder.Commands
             }
 
             using var archive = ZipFile.Open(zipPath, ZipArchiveMode.Create);
-            var entry = archive.CreateEntry($"runtimes/{rid}/native/{libraryName}");
-
-            using var output = entry.Open();
-            using var input = new FileStream(libraryPath, FileMode.Open, FileAccess.Read);
-
-            var buffer = new byte[256];
-            while (true)
+            foreach (var directory in sLibraryNames.Keys)
             {
-                int countRead = input.Read(buffer, 0, buffer.Length);
-                if (countRead <= 0)
+                string binaryDirectory = Path.Join(buildDirectory, directory);
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    break;
+                    binaryDirectory = Path.Join(binaryDirectory, "Release"); // :)
                 }
 
-                output.Write(buffer, 0, countRead);
+                string libraryName = Utilities.GetSharedLibraryName(sLibraryNames[directory]);
+                string libraryPath = Path.Join(binaryDirectory, libraryName);
+
+                var entry = archive.CreateEntry($"runtimes/{rid}/native/{libraryName}");
+
+                using var output = entry.Open();
+                using var input = new FileStream(libraryPath, FileMode.Open, FileAccess.Read);
+
+                var buffer = new byte[256];
+                while (true)
+                {
+                    int countRead = input.Read(buffer, 0, buffer.Length);
+                    if (countRead <= 0)
+                    {
+                        break;
+                    }
+
+                    output.Write(buffer, 0, countRead);
+                }
             }
         }
 
         public void Invoke(string[] args)
         {
-            string sourceDirectory = args.Length > 0 ? args[0] : Path.Join(Environment.CurrentDirectory, "optick");
+            string sourceDirectory = args.Length > 0 ? args[0] : Environment.CurrentDirectory;
             if (!Directory.Exists(sourceDirectory))
             {
                 throw new DirectoryNotFoundException($"No such directory: {sourceDirectory}");

@@ -56,7 +56,7 @@ namespace Optick.NET
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Event Category(string name, Category category) => Event(name, category);
+        public static Event Category(string name, Category category, int frameSkip = 1) => Event(name, category, frameSkip: frameSkip);
 
         /// <summary>
         /// <b>IMPORTANT:</b> user will need to register the thread manually
