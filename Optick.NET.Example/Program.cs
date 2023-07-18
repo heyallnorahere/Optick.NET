@@ -8,10 +8,13 @@ namespace Optick.NET.Example
     {
         private static readonly IReadOnlyDictionary<ConsoleKey, Action> sKeyEvents;
         private static bool sShouldQuit;
+        private static ulong sFrameIndex;
 
         static Program()
         {
             sShouldQuit = false;
+            sFrameIndex = 0;
+
             sKeyEvents = new Dictionary<ConsoleKey, Action>
             {
                 [ConsoleKey.Q] = () =>
@@ -29,8 +32,22 @@ namespace Optick.NET.Example
 
         private static bool OnStateChanged(State state)
         {
-            // nothing here currently
+            switch (state)
+            {
+                case State.STOP_CAPTURE:
+                    Optick.AttachSummary("Last frame", sFrameIndex.ToString());
+                    break;
+            }
+
             return true;
+        }
+
+        private static void Print()
+        {
+            using var printEvent = Optick.Event();
+            Optick.Tag("Frame index", sFrameIndex);
+
+            Console.WriteLine($"Frame {sFrameIndex++}");
         }
 
         public static void Main(string[] args)
@@ -42,15 +59,22 @@ namespace Optick.NET.Example
                 const string threadName = "MainThread";
                 using var scope = new ThreadScope(threadName);
 
-                ulong frameIndex = 0;
                 while (!sShouldQuit)
                 {
                     using var frameEvent = Optick.Frame(threadName);
 
                     using (var updateEvent = Optick.Category("Update", Category.GameLogic))
                     {
-                        Console.WriteLine($"Frame {frameIndex++}");
-                        Thread.Sleep(1000 / 600);
+                        double start = Optick.GetHighPrecisionTime();
+                        Print();
+                        double end = Optick.GetHighPrecisionTime();
+                        double duration = start - end;
+
+                        double frequency = Optick.GetHighPrecisionFrequency();
+                        double sleepDuration = (frequency / 60) - duration;
+
+                        double sleep = sleepDuration * 1000 / frequency;
+                        Thread.Sleep((int)Math.Max(sleep, 0));
                     }
 
                     while (!Console.IsInputRedirected && Console.KeyAvailable)
@@ -68,6 +92,8 @@ namespace Optick.NET.Example
                         }
                     }
                 }
+
+                Optick.Update();
             }
 
             Optick.Shutdown();
