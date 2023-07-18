@@ -33,8 +33,9 @@ jobs:
             - name: push artifact
               uses: actions/upload-artifact@v3
               with:
-                name: artifact-${{ matrix.os-name }}
+                name: platform-binaries
                 path: artifacts/artifact-*.zip
+                retention-days: 1
     packages:
         runs-on: ubuntu-latest
         needs: artifacts

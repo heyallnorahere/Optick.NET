@@ -109,6 +109,145 @@ namespace Optick.NET
         [DllImport(Optick.LibraryName, EntryPoint = "Optick::EventDescription::Create", CallingConvention = Optick.Convention)]
         public static extern unsafe EventDescription* Create([MarshalAs(UnmanagedType.LPStr)] string eventName, [MarshalAs(UnmanagedType.LPStr)] string fileName, uint fileLine, Color eventColor = Color.Null, Filter filter = Filter.None, Flags flags = 0);
         [DllImport(Optick.LibraryName, EntryPoint = "Optick::EventDescription::CreateShared", CallingConvention = Optick.Convention)]
-        public static extern unsafe EventDescription* Create([MarshalAs(UnmanagedType.LPStr)] string eventName, [MarshalAs(UnmanagedType.LPStr)] string? fileName = null, uint fileLine = 0, Color eventColor = Color.Null, Filter filter = Filter.None);
+        public static extern unsafe EventDescription* CreateShared([MarshalAs(UnmanagedType.LPStr)] string eventName, [MarshalAs(UnmanagedType.LPStr)] string? fileName = null, uint fileLine = 0, Color eventColor = Color.Null, Filter filter = Filter.None);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Event : IDisposable
+    {
+        public unsafe EventData* Data;
+
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Event::Start", CallingConvention = Optick.Convention)]
+        public static extern unsafe EventData* Start(ref EventDescription description);
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Event::Stop", CallingConvention = Optick.Convention)]
+        public static extern void Stop(ref EventData data);
+
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Event::Push", CallingConvention = Optick.Convention)]
+        public static extern void Push([MarshalAs(UnmanagedType.LPStr)] string name);
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Event::Push", CallingConvention = Optick.Convention)]
+        public static extern void Push(ref EventDescription description);
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Event::Pop", CallingConvention = Optick.Convention)]
+        public static extern void Pop();
+
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Event::Add", CallingConvention = Optick.Convention)]
+        public static extern unsafe void Add(nint storage, EventDescription* description, long timestampStart, long timestampFinish);
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Event::Push", CallingConvention = Optick.Convention)]
+        public static extern unsafe void Push(nint storage, EventDescription* description, long timestampStart);
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Event::Pop", CallingConvention = Optick.Convention)]
+        public static extern unsafe void Pop(nint storage, long timestampStart);
+
+        public unsafe Event(ref EventDescription description)
+        {
+            Data = Start(ref description);
+        }
+
+        public unsafe void Dispose()
+        {
+            if (Data is not null)
+            {
+                Stop(ref *Data);
+            }
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GPUEvent : IDisposable
+    {
+        public unsafe EventData* Data;
+
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::GPUEvent::Start", CallingConvention = Optick.Convention)]
+        public static extern unsafe EventData* Start(ref EventDescription description);
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::GPUEvent::Stop", CallingConvention = Optick.Convention)]
+        public static extern void Stop(ref EventData data);
+
+        public unsafe GPUEvent(ref EventDescription description)
+        {
+            Data = Start(ref description);
+        }
+
+        public unsafe void Dispose()
+        {
+            if (Data is not null)
+            {
+                Stop(ref *Data);
+            }
+        }
+    }
+
+    public static class Tag
+    {
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Tag::Attach", CallingConvention = Optick.Convention)]
+        public static extern void Attach(nint description, float value);
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Tag::Attach", CallingConvention = Optick.Convention)]
+        public static extern void Attach(nint description, int value);
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Tag::Attach", CallingConvention = Optick.Convention)]
+        public static extern void Attach(nint description, uint value);
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Tag::Attach", CallingConvention = Optick.Convention)]
+        public static extern void Attach(nint description, ulong value);
+        public static void Attach(nint description, object? value) => Attach(description, value?.ToString() ?? "null");
+        [DllImport(Optick.LibraryName, EntryPoint = "Optick::Tag::Attach", CallingConvention = Optick.Convention)]
+        public static extern void Attach(nint description, [MarshalAs(UnmanagedType.LPStr)] string value);
+    }
+
+    public struct ThreadScope : IDisposable
+    {
+        public ThreadScope(string name)
+        {
+            Optick.RegisterThread(name);
+        }
+
+        public void Dispose()
+        {
+            Optick.UnRegisterThread(false);
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GPUContext
+    {
+        public nint CommandList;
+        public GPUQueueType QueueType;
+        public int Node;
+    }
+
+    public readonly struct GPUContextScope : IDisposable
+    {
+        public readonly GPUContext PreviousContext;
+
+        public GPUContextScope(nint commandList, GPUQueueType queueType = GPUQueueType.Graphics, int node = 0)
+        {
+            PreviousContext = Optick.SetGpuContext(new GPUContext
+            {
+                CommandList = commandList,
+                QueueType = queueType,
+                Node = node
+            });
+        }
+
+        public void Dispose()
+        {
+            Optick.SetGpuContext(PreviousContext);
+        }
+    }
+
+    public struct OptickApp : IDisposable
+    {
+        public string Name { get; set; }
+
+        public OptickApp(string name)
+        {
+            Name = name;
+
+            // see OPTICK_APP(NAME)
+            Optick.RegisterThread(name);
+            Optick.StartCapture();
+        }
+
+        public void Dispose()
+        {
+            Optick.StopCapture();
+            Optick.SaveCapture(Name);
+            Optick.UnRegisterThread(false);
+        }
     }
 }

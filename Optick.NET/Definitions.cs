@@ -1,4 +1,5 @@
 using System;
+using System.Net.Mail;
 using System.Runtime.InteropServices;
 
 namespace Optick.NET
@@ -221,8 +222,8 @@ namespace Optick.NET
         }
 
         public ulong Value { get; }
-        public uint CategoryMask => (uint)(Value >> 32);
-        public uint CategoryColor => (uint)(Value & (ulong)(Math.Pow(2, 32) - 1));
+        public Filter CategoryMask => (Filter)(Value >> 32);
+        public Color CategoryColor => (Color)(Value & (ulong)(Math.Pow(2, 32) - 1));
 
         // CPU
         public static Category None => Optick.MakeCategory(Filter.None, Color.Null);
@@ -353,5 +354,21 @@ namespace Optick.NET
         OPTICK_OTHER
     }
 
-    
+    public enum GPUQueueType : int
+    {
+        Graphics,
+        Compute,
+        Transfer,
+        VSync
+    }
+
+    [UnmanagedFunctionPointer(Optick.Convention)]
+    public delegate nint AllocateFunction(nuint size);
+    [UnmanagedFunctionPointer(Optick.Convention)]
+    public delegate void DeallocateFunction(nint address);
+    [UnmanagedFunctionPointer(Optick.Convention)]
+    public delegate void InitThreadCallback();
+
+    [UnmanagedFunctionPointer(Optick.Convention)]
+    public unsafe delegate void CaptureSaveChunkCallback(byte* data, nuint size);
 }
