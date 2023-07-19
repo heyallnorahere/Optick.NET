@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace Optick.NET
 {
-    public static partial class Optick
+    public static class OptickImports
     {
         public const string LibraryName = "coptick";
         public const CallingConvention ImportConvention = CallingConvention.Cdecl;

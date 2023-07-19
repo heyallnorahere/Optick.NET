@@ -226,41 +226,41 @@ namespace Optick.NET
         public Color CategoryColor => (Color)(Value & (ulong)(Math.Pow(2, 32) - 1));
 
         // CPU
-        public static Category None => Optick.MakeCategory(Filter.None, Color.Null);
-        public static Category AI => Optick.MakeCategory(Filter.AI, Color.Purple);
-        public static Category Animation => Optick.MakeCategory(Filter.Animation, Color.LightSkyBlue);
-        public static Category Audio => Optick.MakeCategory(Filter.Audio, Color.HotPink);
-        public static Category Debug => Optick.MakeCategory(Filter.Debug, Color.Black);
-        public static Category Camera => Optick.MakeCategory(Filter.Camera, Color.Black);
-        public static Category Cloth => Optick.MakeCategory(Filter.Cloth, Color.DarkGreen);
-        public static Category GameLogic => Optick.MakeCategory(Filter.GameLogic, Color.RoyalBlue);
-        public static Category Input => Optick.MakeCategory(Filter.Input, Color.Ivory);
-        public static Category Navigation => Optick.MakeCategory(Filter.Navigation, Color.Magenta);
-        public static Category Network => Optick.MakeCategory(Filter.Network, Color.Olive);
-        public static Category Physics => Optick.MakeCategory(Filter.Physics, Color.LawnGreen);
-        public static Category Rendering => Optick.MakeCategory(Filter.Rendering, Color.BurlyWood);
-        public static Category Scene => Optick.MakeCategory(Filter.Scene, Color.RoyalBlue);
-        public static Category Script => Optick.MakeCategory(Filter.Script, Color.Plum);
-        public static Category Streaming => Optick.MakeCategory(Filter.Streaming, Color.Gold);
-        public static Category UI => Optick.MakeCategory(Filter.UI, Color.PaleTurquoise);
-        public static Category VFX => Optick.MakeCategory(Filter.VFX, Color.SaddleBrown);
-        public static Category Visibility => Optick.MakeCategory(Filter.Visibility, Color.Snow);
-        public static Category Wait => Optick.MakeCategory(Filter.Wait, Color.Tomato);
-        public static Category WaitEmpty => Optick.MakeCategory(Filter.Wait, Color.White);
+        public static Category None => OptickMacros.MakeCategory(Filter.None, Color.Null);
+        public static Category AI => OptickMacros.MakeCategory(Filter.AI, Color.Purple);
+        public static Category Animation => OptickMacros.MakeCategory(Filter.Animation, Color.LightSkyBlue);
+        public static Category Audio => OptickMacros.MakeCategory(Filter.Audio, Color.HotPink);
+        public static Category Debug => OptickMacros.MakeCategory(Filter.Debug, Color.Black);
+        public static Category Camera => OptickMacros.MakeCategory(Filter.Camera, Color.Black);
+        public static Category Cloth => OptickMacros.MakeCategory(Filter.Cloth, Color.DarkGreen);
+        public static Category GameLogic => OptickMacros.MakeCategory(Filter.GameLogic, Color.RoyalBlue);
+        public static Category Input => OptickMacros.MakeCategory(Filter.Input, Color.Ivory);
+        public static Category Navigation => OptickMacros.MakeCategory(Filter.Navigation, Color.Magenta);
+        public static Category Network => OptickMacros.MakeCategory(Filter.Network, Color.Olive);
+        public static Category Physics => OptickMacros.MakeCategory(Filter.Physics, Color.LawnGreen);
+        public static Category Rendering => OptickMacros.MakeCategory(Filter.Rendering, Color.BurlyWood);
+        public static Category Scene => OptickMacros.MakeCategory(Filter.Scene, Color.RoyalBlue);
+        public static Category Script => OptickMacros.MakeCategory(Filter.Script, Color.Plum);
+        public static Category Streaming => OptickMacros.MakeCategory(Filter.Streaming, Color.Gold);
+        public static Category UI => OptickMacros.MakeCategory(Filter.UI, Color.PaleTurquoise);
+        public static Category VFX => OptickMacros.MakeCategory(Filter.VFX, Color.SaddleBrown);
+        public static Category Visibility => OptickMacros.MakeCategory(Filter.Visibility, Color.Snow);
+        public static Category Wait => OptickMacros.MakeCategory(Filter.Wait, Color.Tomato);
+        public static Category WaitEmpty => OptickMacros.MakeCategory(Filter.Wait, Color.White);
 
         // IO
-        public static Category IO => Optick.MakeCategory(Filter.IO, Color.Khaki);
+        public static Category IO => OptickMacros.MakeCategory(Filter.IO, Color.Khaki);
 
         // GPU
-        public static Category GPU_Cloth => Optick.MakeCategory(Filter.GPU_Cloth, Color.DarkGreen);
-        public static Category GPU_Lighting => Optick.MakeCategory(Filter.GPU_Lighting, Color.Khaki);
-        public static Category GPU_PostFX => Optick.MakeCategory(Filter.GPU_PostFX, Color.Maroon);
-        public static Category GPU_Reflections => Optick.MakeCategory(Filter.GPU_Reflections, Color.CadetBlue);
-        public static Category GPU_Scene => Optick.MakeCategory(Filter.GPU_Scene, Color.RoyalBlue);
-        public static Category GPU_Shadows => Optick.MakeCategory(Filter.GPU_Shadows, Color.LightSlateGray);
-        public static Category GPU_UI => Optick.MakeCategory(Filter.GPU_UI, Color.PaleTurquoise);
-        public static Category GPU_VFX => Optick.MakeCategory(Filter.GPU_VFX, Color.SaddleBrown);
-        public static Category GPU_Water => Optick.MakeCategory(Filter.GPU_Water, Color.SteelBlue);
+        public static Category GPU_Cloth => OptickMacros.MakeCategory(Filter.GPU_Cloth, Color.DarkGreen);
+        public static Category GPU_Lighting => OptickMacros.MakeCategory(Filter.GPU_Lighting, Color.Khaki);
+        public static Category GPU_PostFX => OptickMacros.MakeCategory(Filter.GPU_PostFX, Color.Maroon);
+        public static Category GPU_Reflections => OptickMacros.MakeCategory(Filter.GPU_Reflections, Color.CadetBlue);
+        public static Category GPU_Scene => OptickMacros.MakeCategory(Filter.GPU_Scene, Color.RoyalBlue);
+        public static Category GPU_Shadows => OptickMacros.MakeCategory(Filter.GPU_Shadows, Color.LightSlateGray);
+        public static Category GPU_UI => OptickMacros.MakeCategory(Filter.GPU_UI, Color.PaleTurquoise);
+        public static Category GPU_VFX => OptickMacros.MakeCategory(Filter.GPU_VFX, Color.SaddleBrown);
+        public static Category GPU_Water => OptickMacros.MakeCategory(Filter.GPU_Water, Color.SteelBlue);
     }
 
     [Flags]
@@ -344,7 +344,7 @@ namespace Optick.NET
         CANCEL_CAPTURE,
     }
 
-    [UnmanagedFunctionPointer(Optick.CallbackConvention)]
+    [UnmanagedFunctionPointer(OptickImports.CallbackConvention)]
     public delegate bool StateCallback(State state);
 
     public enum FileType : int
@@ -362,13 +362,13 @@ namespace Optick.NET
         VSync
     }
 
-    [UnmanagedFunctionPointer(Optick.CallbackConvention)]
+    [UnmanagedFunctionPointer(OptickImports.CallbackConvention)]
     public delegate nint AllocateFunction(nuint size);
-    [UnmanagedFunctionPointer(Optick.CallbackConvention)]
+    [UnmanagedFunctionPointer(OptickImports.CallbackConvention)]
     public delegate void DeallocateFunction(nint address);
-    [UnmanagedFunctionPointer(Optick.CallbackConvention)]
+    [UnmanagedFunctionPointer(OptickImports.CallbackConvention)]
     public delegate void InitThreadCallback();
 
-    [UnmanagedFunctionPointer(Optick.CallbackConvention)]
+    [UnmanagedFunctionPointer(OptickImports.CallbackConvention)]
     public unsafe delegate void CaptureSaveChunkCallback(byte* data, nuint size);
 }

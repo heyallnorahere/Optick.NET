@@ -19,12 +19,12 @@ namespace Optick.NET.Example
             {
                 [ConsoleKey.Q] = () =>
                 {
-                    using var quitEvent = Optick.Event("Quit");
+                    using var quitEvent = OptickMacros.Event("Quit");
                     sShouldQuit = true;
                 },
                 [ConsoleKey.T] = () =>
                 {
-                    using var timeEvent = Optick.Event("TimeRequested");
+                    using var timeEvent = OptickMacros.Event("TimeRequested");
                     Console.WriteLine(DateTime.Now);
                 }
             };
@@ -35,7 +35,7 @@ namespace Optick.NET.Example
             switch (state)
             {
                 case State.STOP_CAPTURE:
-                    Optick.AttachSummary("Last frame", sFrameIndex.ToString());
+                    OptickImports.AttachSummary("Last frame", sFrameIndex.ToString());
                     break;
             }
 
@@ -44,15 +44,15 @@ namespace Optick.NET.Example
 
         private static void Print()
         {
-            using var printEvent = Optick.Event();
-            Optick.Tag("Frame index", sFrameIndex);
+            using var printEvent = OptickMacros.Event();
+            OptickMacros.Tag("Frame index", sFrameIndex);
 
             Console.WriteLine($"Frame {sFrameIndex++}");
         }
 
         public static void Main(string[] args)
         {
-            Optick.SetStateChangedCallback(OnStateChanged);
+            OptickImports.SetStateChangedCallback(OnStateChanged);
 
             using (var app = new OptickApp("ExampleApp"))
             {
@@ -61,16 +61,16 @@ namespace Optick.NET.Example
 
                 while (!sShouldQuit)
                 {
-                    using var frameEvent = Optick.Frame(threadName);
+                    using var frameEvent = OptickMacros.Frame(threadName);
 
-                    using (var updateEvent = Optick.Category("Update", Category.GameLogic))
+                    using (var updateEvent = OptickMacros.Category("Update", Category.GameLogic))
                     {
-                        double start = Optick.GetHighPrecisionTime();
+                        double start = OptickImports.GetHighPrecisionTime();
                         Print();
-                        double end = Optick.GetHighPrecisionTime();
+                        double end = OptickImports.GetHighPrecisionTime();
                         double duration = start - end;
 
-                        double frequency = Optick.GetHighPrecisionFrequency();
+                        double frequency = OptickImports.GetHighPrecisionFrequency();
                         double sleepDuration = (frequency / 60) - duration;
 
                         double sleep = sleepDuration * 1000 / frequency;
@@ -79,7 +79,7 @@ namespace Optick.NET.Example
 
                     while (!Console.IsInputRedirected && Console.KeyAvailable)
                     {
-                        using var keyPressedEvent = Optick.Category("Key pressed", Category.Input);
+                        using var keyPressedEvent = OptickMacros.Category("Key pressed", Category.Input);
 
                         var key = Console.ReadKey(true);
                         if (sKeyEvents.TryGetValue(key.Key, out Action? handler))
@@ -93,10 +93,10 @@ namespace Optick.NET.Example
                     }
                 }
 
-                Optick.Update();
+                OptickImports.Update();
             }
 
-            Optick.Shutdown();
+            OptickImports.Shutdown();
         }
     }
 }

@@ -7,10 +7,10 @@ using System.Runtime.CompilerServices;
 
 namespace Optick.NET
 {
-    public static partial class Optick
+    public static class OptickMacros
     {
         private static readonly Dictionary<long, nint> sEventDescriptions;
-        static Optick()
+        static OptickMacros()
         {
             sEventDescriptions = new Dictionary<long, nint>();
         }
@@ -72,11 +72,11 @@ namespace Optick.NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static unsafe Event Frame(string name, FrameType type = FrameType.CPU, int frameSkip = 1)
         {
-            EndFrame(type);
-            Update();
+            OptickImports.EndFrame(type);
+            OptickImports.Update();
 
-            uint frameNumber = BeginFrame(type);
-            var resultEvent = new Event(ref *GetFrameDescription(type));
+            uint frameNumber = OptickImports.BeginFrame(type);
+            var resultEvent = new Event(ref *OptickImports.GetFrameDescription(type));
 
             Tag("Frame", new object[] { frameNumber }, frameSkip: 2);
             return resultEvent;
@@ -84,20 +84,20 @@ namespace Optick.NET
 
         public static void FrameFlip(FrameType type = FrameType.CPU, long timestamp = -1, ulong threadID = ulong.MaxValue)
         {
-            EndFrame(type, timestamp, threadID);
-            BeginFrame(type, timestamp, threadID);
+            OptickImports.EndFrame(type, timestamp, threadID);
+            OptickImports.BeginFrame(type, timestamp, threadID);
         }
 
         public static unsafe Event FrameEvent(FrameType type)
         {
-            EndFrame(type);
+            OptickImports.EndFrame(type);
             if (type == FrameType.CPU)
             {
-                Update();
+                OptickImports.Update();
             }
 
-            BeginFrame(type);
-            return new Event(ref *GetFrameDescription(type));
+            OptickImports.BeginFrame(type);
+            return new Event(ref *OptickImports.GetFrameDescription(type));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

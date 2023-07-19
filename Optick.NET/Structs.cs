@@ -15,8 +15,8 @@ namespace Optick.NET
 
         public long Start, Finish;
 
-        public void Begin() => Start = Optick.GetHighPrecisionTime();
-        public void End() => Finish = Optick.GetHighPrecisionTime();
+        public void Begin() => Start = OptickImports.GetHighPrecisionTime();
+        public void End() => Finish = OptickImports.GetHighPrecisionTime();
 
         /* not defining a matching operator <3
         public static bool operator <(EventTime lhs, EventTime rhs)
@@ -55,9 +55,9 @@ namespace Optick.NET
         public EventTime Timing;
         public ulong ThreadID;
 
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_FiberSyncData_AttachToThread", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_FiberSyncData_AttachToThread", CallingConvention = OptickImports.ImportConvention)]
         public static extern void AttachToThread(nint storage, ulong threadId);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_FiberSyncData_DetachFromThread", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_FiberSyncData_DetachFromThread", CallingConvention = OptickImports.ImportConvention)]
         public static extern void DetachFromThread(nint storage);
     }
 
@@ -95,9 +95,9 @@ namespace Optick.NET
         public Filter EventFilter;
         public Flags EventFlags;
 
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_EventDescription_Create", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_EventDescription_Create", CallingConvention = OptickImports.ImportConvention)]
         public static extern unsafe EventDescription* Create([MarshalAs(UnmanagedType.LPStr)] string eventName, [MarshalAs(UnmanagedType.LPStr)] string fileName, uint fileLine, Color eventColor = Color.Null, Filter filter = Filter.None, Flags flags = 0);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_EventDescription_CreateShared", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_EventDescription_CreateShared", CallingConvention = OptickImports.ImportConvention)]
         public static extern unsafe EventDescription* CreateShared([MarshalAs(UnmanagedType.LPStr)] string eventName, [MarshalAs(UnmanagedType.LPStr)] string? fileName = null, uint fileLine = 0, Color eventColor = Color.Null, Filter filter = Filter.None);
     }
 
@@ -106,23 +106,23 @@ namespace Optick.NET
     {
         public unsafe EventData* Data;
 
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Event_Start", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Event_Start", CallingConvention = OptickImports.ImportConvention)]
         public static extern unsafe EventData* Start(ref EventDescription description);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Event_Stop", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Event_Stop", CallingConvention = OptickImports.ImportConvention)]
         public static extern void Stop(ref EventData data);
 
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Event_Push_LPStr", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Event_Push_LPStr", CallingConvention = OptickImports.ImportConvention)]
         public static extern void Push([MarshalAs(UnmanagedType.LPStr)] string name);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Event_Push_Description", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Event_Push_Description", CallingConvention = OptickImports.ImportConvention)]
         public static extern void Push(ref EventDescription description);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Event_Pop", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Event_Pop", CallingConvention = OptickImports.ImportConvention)]
         public static extern void Pop();
 
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Event_Add", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Event_Add", CallingConvention = OptickImports.ImportConvention)]
         public static extern unsafe void Add(nint storage, EventDescription* description, long timestampStart, long timestampFinish);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Event_Push_Storage", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Event_Push_Storage", CallingConvention = OptickImports.ImportConvention)]
         public static extern unsafe void Push(nint storage, EventDescription* description, long timestampStart);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Event_Pop_Storage", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Event_Pop_Storage", CallingConvention = OptickImports.ImportConvention)]
         public static extern unsafe void Pop(nint storage, long timestampStart);
 
         public unsafe Event(ref EventDescription description)
@@ -144,9 +144,9 @@ namespace Optick.NET
     {
         public unsafe EventData* Data;
 
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_GPUEvent_Start", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_GPUEvent_Start", CallingConvention = OptickImports.ImportConvention)]
         public static extern unsafe EventData* Start(ref EventDescription description);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_GPUEvent_Stop", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_GPUEvent_Stop", CallingConvention = OptickImports.ImportConvention)]
         public static extern void Stop(ref EventData data);
 
         public unsafe GPUEvent(ref EventDescription description)
@@ -165,16 +165,16 @@ namespace Optick.NET
 
     public static class Tag
     {
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Tag_Attach_Float", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Tag_Attach_Float", CallingConvention = OptickImports.ImportConvention)]
         public static extern void Attach(nint description, float value);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Tag_Attach_Int32", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Tag_Attach_Int32", CallingConvention = OptickImports.ImportConvention)]
         public static extern void Attach(nint description, int value);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Tag_Attach_UInt32", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Tag_Attach_UInt32", CallingConvention = OptickImports.ImportConvention)]
         public static extern void Attach(nint description, uint value);
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Tag_Attach_UInt64", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Tag_Attach_UInt64", CallingConvention = OptickImports.ImportConvention)]
         public static extern void Attach(nint description, ulong value);
         public static void Attach(nint description, object? value) => Attach(description, value?.ToString() ?? "null");
-        [DllImport(Optick.LibraryName, EntryPoint = "Optick_Tag_Attach_LPStr", CallingConvention = Optick.ImportConvention)]
+        [DllImport(OptickImports.LibraryName, EntryPoint = "Optick_Tag_Attach_LPStr", CallingConvention = OptickImports.ImportConvention)]
         public static extern void Attach(nint description, [MarshalAs(UnmanagedType.LPStr)] string value);
     }
 
@@ -182,12 +182,12 @@ namespace Optick.NET
     {
         public ThreadScope(string name)
         {
-            Optick.RegisterThread(name);
+            OptickImports.RegisterThread(name);
         }
 
         public void Dispose()
         {
-            Optick.UnRegisterThread(false);
+            OptickImports.UnRegisterThread(false);
         }
     }
 
@@ -214,7 +214,7 @@ namespace Optick.NET
 
             fixed (GPUContext* previous = &PreviousContext)
             {
-                Optick.SetGpuContext(&context, previous);
+                OptickImports.SetGpuContext(&context, previous);
             }
         }
 
@@ -222,7 +222,7 @@ namespace Optick.NET
         {
             fixed (GPUContext* previous = &PreviousContext)
             {
-                Optick.SetGpuContext(previous, null);
+                OptickImports.SetGpuContext(previous, null);
             }
         }
     }
@@ -236,15 +236,15 @@ namespace Optick.NET
             Name = name;
 
             // see OPTICK_APP(NAME)
-            Optick.RegisterThread(name);
-            Optick.StartCapture();
+            OptickImports.RegisterThread(name);
+            OptickImports.StartCapture();
         }
 
         public void Dispose()
         {
-            Optick.StopCapture();
-            Optick.SaveCapture(Name);
-            Optick.UnRegisterThread(false);
+            OptickImports.StopCapture();
+            OptickImports.SaveCapture(Name);
+            OptickImports.UnRegisterThread(false);
         }
     }
 }
