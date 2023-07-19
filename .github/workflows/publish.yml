@@ -1,5 +1,8 @@
 name: publish
-on: [ push ] # todo: change to "tag" or something
+on:
+    push:
+        tags:
+          - v*
 jobs:
     artifacts:
         runs-on: ${{ matrix.os-name }}-latest
@@ -10,29 +13,29 @@ jobs:
                     - ubuntu
                     - macos
         steps:
-            - name: checkout
-              uses: actions/checkout@v3
-            - name: setup dotnet
-              uses: actions/setup-dotnet@v3
-              with:
+          - name: checkout
+            uses: actions/checkout@v3
+          - name: setup dotnet
+            uses: actions/setup-dotnet@v3
+            with:
                 dotnet-version: 7.x.x
-            - name: install vulkan
-              uses: humbletim/setup-vulkan-sdk@v1.2.0
-              with:
+          - name: install vulkan
+            uses: humbletim/setup-vulkan-sdk@v1.2.0
+            with:
                 vulkan-query-version: latest
                 vulkan-use-cache: true
                 vulkan-components: Vulkan-Headers, Vulkan-Loader
-            - name: pull optick
-              shell: bash
-              run: git clone --branch fix-vulkan --recursive https://github.com/qbojj/optick.git  
-            - name: build optick!
-              shell: bash
-              run: |
+          - name: pull optick
+            shell: bash
+            run: git clone --branch fix-vulkan --recursive https://github.com/qbojj/optick.git  
+          - name: build optick!
+            shell: bash
+            run: |
                 dotnet build -c Release
                 dotnet Optick.NET.RedistBuilder/bin/Release/net7.0/Optick.NET.RedistBuilder.dll build-artifact
-            - name: push artifact
-              uses: actions/upload-artifact@v3
-              with:
+          - name: push artifact
+            uses: actions/upload-artifact@v3
+            with:
                 name: platform-binaries
                 path: artifacts/artifact-*.zip
                 retention-days: 1
@@ -40,25 +43,26 @@ jobs:
         runs-on: ubuntu-latest
         needs: artifacts
         steps:
-            - name: checkout
-              uses: actions/checkout@v3
-            - name: setup dotnet
-              uses: actions/setup-dotnet@v3
-              with:
+          - name: checkout
+            uses: actions/checkout@v3
+          - name: setup dotnet
+            uses: actions/setup-dotnet@v3
+            with:
                 dotnet-version: 7.x.x
-            - name: download artifacts
-              uses: actions/download-artifact@v3 # will download every artifact from this workflow run
-              with:
+          - name: download artifacts
+            uses: actions/download-artifact@v3 # will download every artifact from this workflow run
+            with:
                 name: platform-binaries
                 path: artifacts # download to artifacts directory
-            - name: build redist package
-              shell: bash
-              run: |
+          - name: build redist package
+            shell: bash
+            run: |
                 dotnet build -c Release
                 dotnet Optick.NET.RedistBuilder/bin/Release/net7.0/Optick.NET.RedistBuilder.dll create-package
-            - name: push packages
-              shell: bash
-              run: |
+          - name: push packages
+            shell: bash
+            run: |
                 dotnet pack
 
-                # todo: push packages
+                dotnet nuget add source --username yodasoda1219 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/yodasoda1219/index.json"
+                dotnet nuget push "Optick.NET/bin/Release/Optick.NET.*.nupkg" "artifacts/Optick.NET.Redist.nupkg" --source "github"
