@@ -30,16 +30,19 @@ namespace Optick.NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static unsafe EventDescription* GetEventDescription(int frameSkip, string? name = null, Category? category = null, EventDescription.Flags flags = 0)
         {
-            var stackFrame = new StackFrame(frameSkip + 1);
+            var stackFrame = new StackFrame(frameSkip + 1, true);
             var method = stackFrame.GetMethod();
 
-            var fileName = stackFrame.GetFileName() ?? "<unknown>";
+            var fileName = stackFrame.GetFileName();
+            var usedFileName = string.IsNullOrEmpty(fileName) ? "<unknown>" : fileName;
+
             int lineNumber = stackFrame.GetFileLineNumber();
+            int usedLineNumber = lineNumber > 0 ? lineNumber : stackFrame.GetILOffset();
 
             long id = (((long)method.GetHashCode()) << 32) | (long)lineNumber;
             if (!sEventDescriptions.TryGetValue(id, out nint description))
             {
-                var eventDescription = CreateDescription(method.Name, fileName, lineNumber, name, category, flags);
+                var eventDescription = CreateDescription(method.Name, usedFileName, usedLineNumber, name, category, flags);
                 description = sEventDescriptions[id] = (nint)eventDescription;
             }
 
