@@ -62,7 +62,7 @@ jobs:
           - name: push packages
             shell: bash
             run: |
-                dotnet pack
+                dotnet pack -c Release
 
                 dotnet nuget add source --username yodasoda1219 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/yodasoda1219/index.json"
-                dotnet nuget push "Optick.NET/bin/Release/Optick.NET.*.nupkg" "artifacts/Optick.NET.Redist.nupkg" --source "github"
+                dotnet nuget push Optick.NET/bin/Release/Optick.NET.*.nupkg artifacts/Optick.NET.Redist.nupkg --source "github"
