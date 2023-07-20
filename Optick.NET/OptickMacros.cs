@@ -31,13 +31,7 @@ namespace Optick.NET
         private static unsafe EventDescription* GetEventDescription(int frameSkip, string? name = null, Category? category = null, EventDescription.Flags flags = 0)
         {
             var stackFrame = new StackFrame(frameSkip + 1, true);
-
             var method = stackFrame.GetMethod();
-            var declaringType = method.DeclaringType;
-            var methodName = $"{declaringType}.{method.Name}";
-
-            var fileName = stackFrame.GetFileName();
-            var usedFileName = string.IsNullOrEmpty(fileName) ? "<unknown>" : fileName;
 
             int lineNumber = stackFrame.GetFileLineNumber();
             int usedLineNumber = lineNumber > 0 ? lineNumber : stackFrame.GetILOffset();
@@ -45,7 +39,28 @@ namespace Optick.NET
             long id = (((long)method.GetHashCode()) << 32) | (long)lineNumber;
             if (!sEventDescriptions.TryGetValue(id, out nint description))
             {
-                var eventDescription = CreateDescription(method.Name, usedFileName, usedLineNumber, name, category, flags);
+                string parameterString = string.Empty;
+                var parameters = method.GetParameters();
+
+                foreach (var parameter in parameters)
+                {
+                    if (parameterString.Length > 0)
+                    {
+                        parameterString += ", ";
+                    }
+
+                    var parameterType = parameter.ParameterType;
+                    parameterString += parameterType.FullName ?? parameterType.Name;
+                }
+
+                var declaringType = method.DeclaringType;
+                var methodName = $"{declaringType}.{method.Name}";
+                var methodSignature = $"{methodName}({parameterString})";
+
+                var fileName = stackFrame.GetFileName();
+                var usedFileName = string.IsNullOrEmpty(fileName) ? "<unknown>" : fileName;
+
+                var eventDescription = CreateDescription(methodSignature, usedFileName, usedLineNumber, name, category, flags);
                 description = sEventDescriptions[id] = (nint)eventDescription;
             }
 
