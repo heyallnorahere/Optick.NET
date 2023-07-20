@@ -31,7 +31,10 @@ namespace Optick.NET
         private static unsafe EventDescription* GetEventDescription(int frameSkip, string? name = null, Category? category = null, EventDescription.Flags flags = 0)
         {
             var stackFrame = new StackFrame(frameSkip + 1, true);
+
             var method = stackFrame.GetMethod();
+            var declaringType = method.DeclaringType;
+            var methodName = $"{declaringType}.{method.Name}";
 
             var fileName = stackFrame.GetFileName();
             var usedFileName = string.IsNullOrEmpty(fileName) ? "<unknown>" : fileName;
