@@ -37,34 +37,37 @@ namespace Optick.NET
             int usedLineNumber = lineNumber > 0 ? lineNumber : stackFrame.GetILOffset();
 
             long id = (((long)method.GetHashCode()) << 32) | (long)lineNumber;
-            if (!sEventDescriptions.TryGetValue(id, out nint description))
+            lock (sEventDescriptions)
             {
-                string parameterString = string.Empty;
-                var parameters = method.GetParameters();
-
-                foreach (var parameter in parameters)
+                if (!sEventDescriptions.TryGetValue(id, out nint description))
                 {
-                    if (parameterString.Length > 0)
+                    string parameterString = string.Empty;
+                    var parameters = method.GetParameters();
+
+                    foreach (var parameter in parameters)
                     {
-                        parameterString += ", ";
+                        if (parameterString.Length > 0)
+                        {
+                            parameterString += ", ";
+                        }
+
+                        var parameterType = parameter.ParameterType;
+                        parameterString += parameterType.FullName ?? parameterType.Name;
                     }
 
-                    var parameterType = parameter.ParameterType;
-                    parameterString += parameterType.FullName ?? parameterType.Name;
+                    var declaringType = method.DeclaringType;
+                    var methodName = $"{declaringType}.{method.Name}";
+                    var methodSignature = $"{methodName}({parameterString})";
+
+                    var fileName = stackFrame.GetFileName();
+                    var usedFileName = string.IsNullOrEmpty(fileName) ? "<unknown>" : fileName;
+
+                    var eventDescription = CreateDescription(methodSignature, usedFileName, usedLineNumber, name, category, flags);
+                    description = sEventDescriptions[id] = (nint)eventDescription;
                 }
 
-                var declaringType = method.DeclaringType;
-                var methodName = $"{declaringType}.{method.Name}";
-                var methodSignature = $"{methodName}({parameterString})";
-
-                var fileName = stackFrame.GetFileName();
-                var usedFileName = string.IsNullOrEmpty(fileName) ? "<unknown>" : fileName;
-
-                var eventDescription = CreateDescription(methodSignature, usedFileName, usedLineNumber, name, category, flags);
-                description = sEventDescriptions[id] = (nint)eventDescription;
+                return (EventDescription*)description;
             }
-
-            return (EventDescription*)description;
         }
 
         // if only we had c macros...
