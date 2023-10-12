@@ -182,12 +182,18 @@ namespace Optick.NET
     {
         public ThreadScope(string name)
         {
-            OptickImports.RegisterThread(name);
+            if (OptickMacros.IsOptickEnabled)
+            {
+                OptickImports.RegisterThread(name);
+            }
         }
 
         public void Dispose()
         {
-            OptickImports.UnRegisterThread(false);
+            if (OptickMacros.IsOptickEnabled)
+            {
+                OptickImports.UnRegisterThread(false);
+            }
         }
     }
 
@@ -205,6 +211,11 @@ namespace Optick.NET
 
         public unsafe GPUContextScope(nint commandList, GPUQueueType queueType = GPUQueueType.Graphics, int node = 0)
         {
+            if (!OptickMacros.IsOptickEnabled)
+            {
+                return;
+            }
+
             var context = new GPUContext
             {
                 CommandList = commandList,
@@ -220,6 +231,11 @@ namespace Optick.NET
 
         public unsafe void Dispose()
         {
+            if (!OptickMacros.IsOptickEnabled)
+            {
+                return;
+            }
+
             fixed (GPUContext* previous = &PreviousContext)
             {
                 OptickImports.SetGpuContext(previous, null);
@@ -234,6 +250,10 @@ namespace Optick.NET
         public OptickApp(string name)
         {
             Name = name;
+            if (!OptickMacros.IsOptickEnabled)
+            {
+                return;
+            }
 
             // see OPTICK_APP(NAME)
             OptickImports.RegisterThread(name);
@@ -242,6 +262,11 @@ namespace Optick.NET
 
         public void Dispose()
         {
+            if (!OptickMacros.IsOptickEnabled)
+            {
+                return;
+            }
+            
             OptickImports.StopCapture();
             OptickImports.SaveCapture(Name);
             OptickImports.UnRegisterThread(false);

@@ -1,5 +1,4 @@
 using System;
-using System.Net.Mail;
 using System.Runtime.InteropServices;
 
 namespace Optick.NET

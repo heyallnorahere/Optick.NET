@@ -4,22 +4,57 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Optick.NET
 {
+    internal sealed class DummyDisposable : IDisposable
+    {
+        public void Dispose()
+        {
+            // does nothing
+        }
+    }
+
     public static class OptickMacros
     {
         private static readonly Dictionary<long, nint> sEventDescriptions;
+        private static readonly bool sEnabled;
         static OptickMacros()
         {
             sEventDescriptions = new Dictionary<long, nint>();
+            sEnabled = true;
+
+            var disabledPlatforms = new HashSet<string>
+            {
+                "ios",
+                "maccatalyst",
+                "android"
+            };
+
+            foreach (var platformName in disabledPlatforms)
+            {
+                var osplatform = OSPlatform.Create(platformName);
+                if (!RuntimeInformation.IsOSPlatform(osplatform))
+                {
+                    sEnabled = false;
+                    break;
+                }
+            }
         }
+
+        public static bool IsOptickEnabled => sEnabled;
 
         public static Category MakeCategory(Filter filter, Color color) => new Category((((ulong)(1)) << ((int)filter + 32)) | (ulong)color);
 
         // CreateDescription(const char*, const char*, int, const ::Optick::Category::Type) is redundant
         public static unsafe EventDescription* CreateDescription(string functionName, string fileName, int fileLine, string? eventName = null, Category? category = null, EventDescription.Flags flags = 0)
         {
+            if (!sEnabled)
+            {
+                return null;
+            }
+
             // why do i need the null-forgiving operator?
             var usedEventName = string.IsNullOrEmpty(eventName) ? functionName : eventName!;
 
@@ -72,8 +107,13 @@ namespace Optick.NET
 
         // if only we had c macros...
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static unsafe Event Event(string? name = null, Category? category = null, EventDescription.Flags flags = 0, int frameSkip = 1)
+        public static unsafe IDisposable Event(string? name = null, Category? category = null, EventDescription.Flags flags = 0, int frameSkip = 1)
         {
+            if (!sEnabled)
+            {
+                return new DummyDisposable();
+            }
+
             var usedFlags = flags;
             if (!string.IsNullOrEmpty(name))
             {
@@ -85,14 +125,19 @@ namespace Optick.NET
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static Event Category(string name, Category category, int frameSkip = 1) => Event(name, category, frameSkip: frameSkip + 1);
+        public static IDisposable Category(string name, Category category, int frameSkip = 1) => Event(name, category, frameSkip: frameSkip + 1);
 
         /// <summary>
         /// <b>IMPORTANT:</b> user will need to register the thread manually
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static unsafe Event Frame(string name, FrameType type = FrameType.CPU, int frameSkip = 1)
+        public static unsafe IDisposable Frame(string name, FrameType type = FrameType.CPU, int frameSkip = 1)
         {
+            if (!sEnabled)
+            {
+                return new DummyDisposable();
+            }
+
             OptickImports.EndFrame(type);
             OptickImports.Update();
 
@@ -105,12 +150,22 @@ namespace Optick.NET
 
         public static void FrameFlip(FrameType type = FrameType.CPU, long timestamp = -1, ulong threadID = ulong.MaxValue)
         {
+            if (!sEnabled)
+            {
+                return;
+            }
+
             OptickImports.EndFrame(type, timestamp, threadID);
             OptickImports.BeginFrame(type, timestamp, threadID);
         }
 
-        public static unsafe Event FrameEvent(FrameType type)
+        public static unsafe IDisposable FrameEvent(FrameType type)
         {
+            if (!sEnabled)
+            {
+                return new DummyDisposable();
+            }
+
             OptickImports.EndFrame(type);
             if (type == FrameType.CPU)
             {
@@ -127,6 +182,11 @@ namespace Optick.NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static unsafe void Tag(string name, object?[] args, int frameSkip = 1)
         {
+            if (!sEnabled)
+            {
+                return;
+            }
+
             var description = GetEventDescription(frameSkip, name: name);
 
             var tagType = typeof(Tag);
@@ -158,10 +218,25 @@ namespace Optick.NET
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static unsafe GPUEvent GPUEvent(string name, int frameSkip = 1)
+        public static unsafe IDisposable GPUEvent(string name, int frameSkip = 1)
         {
+            if (!sEnabled)
+            {
+                return new DummyDisposable();
+            }
+
             var description = GetEventDescription(frameSkip, name: name);
             return new GPUEvent(ref *description);
+        }
+
+        public static void Shutdown()
+        {
+            if (!sEnabled)
+            {
+                return;
+            }
+
+            OptickImports.Shutdown();
         }
     }
 }

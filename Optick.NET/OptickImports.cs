@@ -2,6 +2,9 @@ using System.Runtime.InteropServices;
 
 namespace Optick.NET
 {
+    /// <summary>
+    /// Imported functions directly from Optick. Do keep in mind that if <see cref="OptickMacros.IsOptickEnabled"/> is not true, calling any of these functions may result in an error
+    /// </summary>
     public static class OptickImports
     {
         public const string LibraryName = "coptick";
