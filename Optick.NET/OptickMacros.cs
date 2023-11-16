@@ -35,7 +35,7 @@ namespace Optick.NET
             foreach (var platformName in disabledPlatforms)
             {
                 var osplatform = OSPlatform.Create(platformName);
-                if (!RuntimeInformation.IsOSPlatform(osplatform))
+                if (RuntimeInformation.IsOSPlatform(osplatform))
                 {
                     sEnabled = false;
                     break;
