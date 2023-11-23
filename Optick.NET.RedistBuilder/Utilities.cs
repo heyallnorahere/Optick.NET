@@ -11,31 +11,31 @@ namespace Optick.NET.RedistBuilder
     // sowwy
     public static class Utilities
     {
-        public static string RuntimeIdentifier
+        public static string GenerateBuildRuntimeIdentifier()
         {
-            get
-            {
-                string platform;
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    platform = "win";
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    platform = "osx";
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    platform = "linux";
-                }
-                else
-                {
-                    throw new PlatformNotSupportedException();
-                }
+            string platform;
+            bool isOSX = false;
 
-                var arch = RuntimeInformation.OSArchitecture.ToString();
-                return $"{platform}-{arch.ToLower()}";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                platform = "win";
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                platform = "osx";
+                isOSX = true;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                platform = "linux";
+            }
+            else
+            {
+                throw new PlatformNotSupportedException();
+            }
+
+            var arch = RuntimeInformation.OSArchitecture.ToString();
+            return isOSX ? platform : $"{platform}-{arch.ToLower()}";
         }
 
         public static string GetSharedLibraryName(string name)

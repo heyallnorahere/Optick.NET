@@ -37,6 +37,11 @@ namespace Optick.NET.RedistBuilder.Commands
                 ["OPTICK_BUILD_CONSOLE_SAMPLE"] = false,
             };
 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                sCMakeOptions["CMAKE_OSX_ARCHITECTURES"] = "x86_64;arm64";
+            }
+
             sLibraryNames = new Dictionary<string, string>
             {
                 ["optick"] = "OptickCore",
@@ -52,7 +57,7 @@ namespace Optick.NET.RedistBuilder.Commands
             foreach (var cacheKey in sCMakeOptions.Keys)
             {
                 var value = sCMakeOptions[cacheKey].Value;
-                cmakeCommand += $" -D{cacheKey}={value}";
+                cmakeCommand += $" -D{cacheKey}=\"{value.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
             }
 
             int exitCode = Utilities.RunCommand(cmakeCommand, cwd: Environment.CurrentDirectory);
@@ -73,7 +78,7 @@ namespace Optick.NET.RedistBuilder.Commands
             string artifactDirectory = Path.Join(Environment.CurrentDirectory, "artifacts");
             Directory.CreateDirectory(artifactDirectory);
 
-            string rid = Utilities.RuntimeIdentifier;
+            string rid = Utilities.GenerateBuildRuntimeIdentifier();
             string zipPath = Path.Join(artifactDirectory, $"artifact-{rid}.zip");
 
             if (File.Exists(zipPath))
