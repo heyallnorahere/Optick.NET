@@ -20,11 +20,10 @@ jobs:
             with:
                 dotnet-version: 7.x.x
           - name: install vulkan
-            uses: humbletim/setup-vulkan-sdk@v1.2.0
+            uses: humbletim/install-vulkan-sdk@v1.1.1
             with:
-                vulkan-query-version: latest
-                vulkan-use-cache: true
-                vulkan-components: Vulkan-Headers, Vulkan-Loader
+                version: latest
+                cache: true
           - name: pull optick
             shell: bash
             run: git clone --branch fix-vulkan --recursive https://github.com/qbojj/optick.git  
