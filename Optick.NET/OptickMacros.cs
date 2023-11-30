@@ -19,11 +19,12 @@ namespace Optick.NET
     public static class OptickMacros
     {
         private static readonly Dictionary<long, nint> sEventDescriptions;
-        private static readonly bool sEnabled;
+        private static bool sEnabled, sDebug;
         static OptickMacros()
         {
             sEventDescriptions = new Dictionary<long, nint>();
             sEnabled = true;
+            sDebug = false;
 
             var disabledPlatforms = new HashSet<string>
             {
@@ -43,7 +44,17 @@ namespace Optick.NET
             }
         }
 
-        public static bool IsOptickEnabled => sEnabled;
+        public static bool IsOptickEnabled
+        {
+            get => sEnabled;
+            set => sEnabled = value;
+        }
+
+        public static bool IsDebug
+        {
+            get => sDebug;
+            set => sDebug = value;
+        }
 
         public static Category MakeCategory(Filter filter, Color color) => new Category((((ulong)(1)) << ((int)filter + 32)) | (ulong)color);
 
@@ -65,17 +76,30 @@ namespace Optick.NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static unsafe EventDescription* GetEventDescription(int frameSkip, string? name = null, Category? category = null, EventDescription.Flags flags = 0)
         {
-            var stackFrame = new StackFrame(frameSkip + 1, true);
-            var method = stackFrame.GetMethod();
+            var stackFrame = new StackFrame(frameSkip + 1, sDebug);
 
-            int lineNumber = stackFrame.GetFileLineNumber();
-            int usedLineNumber = lineNumber > 0 ? lineNumber : stackFrame.GetILOffset();
+            MethodBase? method = null;
+            long id;
+            int usedLineNumber = 0;
 
-            long id = (((long)method.GetHashCode()) << 32) | (long)lineNumber;
+            if (sDebug)
+            {
+                method = stackFrame.GetMethod();
+                int lineNumber = stackFrame.GetFileLineNumber();
+                usedLineNumber = lineNumber > 0 ? lineNumber : stackFrame.GetILOffset();
+                id = (((long)method.GetHashCode()) << 32) | (long)usedLineNumber;
+            }
+            else
+            {
+                id = stackFrame.ToString().GetHashCode();
+            }
+
             lock (sEventDescriptions)
             {
                 if (!sEventDescriptions.TryGetValue(id, out nint description))
                 {
+                    method ??= stackFrame.GetMethod();
+
                     string parameterString = string.Empty;
                     var parameters = method.GetParameters();
 

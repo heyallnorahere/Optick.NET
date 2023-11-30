@@ -1,7 +1,7 @@
 <Project>
 
     <PropertyGroup>
-        <Version>1.0.8</Version> <!-- set this whenever you make a tag -->
+        <Version>1.0.9</Version> <!-- set this whenever you make a tag -->
         <PackRelease>true</PackRelease>
     </PropertyGroup>
 

@@ -54,6 +54,10 @@ namespace Optick.NET.Example
         {
             OptickImports.SetStateChangedCallback(OnStateChanged);
 
+#if DEBUG
+            OptickMacros.IsDebug = true;
+#endif
+
             using (var app = new OptickApp("ExampleApp"))
             {
                 const string threadName = "MainThread";
@@ -63,18 +67,21 @@ namespace Optick.NET.Example
                 {
                     using var frameEvent = OptickMacros.Frame(threadName);
 
-                    using (var updateEvent = OptickMacros.Category("Update", Category.GameLogic))
+                    using (OptickMacros.Category("Update", Category.GameLogic))
                     {
                         double start = OptickImports.GetHighPrecisionTime();
                         Print();
                         double end = OptickImports.GetHighPrecisionTime();
-                        double duration = start - end;
 
-                        double frequency = OptickImports.GetHighPrecisionFrequency();
-                        double sleepDuration = (frequency / 60) - duration;
+                        using (OptickMacros.Category("Wait", Category.Wait))
+                        {
+                            double duration = start - end;
+                            double frequency = OptickImports.GetHighPrecisionFrequency();
+                            double sleepDuration = (frequency / 60) - duration;
 
-                        double sleep = sleepDuration * 1000 / frequency;
-                        Thread.Sleep((int)Math.Max(sleep, 0));
+                            double sleep = sleepDuration * 1000 / frequency;
+                            Thread.Sleep((int)Math.Max(sleep, 0));
+                        }
                     }
 
                     while (!Console.IsInputRedirected && Console.KeyAvailable)
